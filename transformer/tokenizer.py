@@ -41,6 +41,30 @@ class Tokenizer:
 
         for _ in token_ids:
             words.append(self.id_to_word[_])
-        print(words)
 
-        return " ".join(words)
+        return words
+
+    def brew(self, sentence, max_length, decode=False):
+
+        dictionary = {}
+
+        ids = self.encode(sentence)
+
+        real_length = len(ids)
+        padding = max_length - real_length
+
+        if real_length <= max_length:
+
+            ids.extend([self.PAD] * padding)
+
+            dictionary["input_ids"] = ids
+            dictionary["attention_mask"] = [1] * real_length + [0] * padding
+
+        else:
+            raise ValueError ("Maximum length is less than Token Length.")
+
+        if decode:
+            dictionary["tokens"] = self.decode(ids)
+
+        return dictionary
+

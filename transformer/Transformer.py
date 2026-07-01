@@ -15,8 +15,4 @@ token.fit(corpus)
 
 embedding = Embedding(5000, 128)
 
-print(token.encode('I LOVE DOGS.'))
-
-print(embedding.forward(token.encode('I LOVE DOGS.')).shape)
-
-print(token.decode(token.encode('I LOVE DOGS.')))
+print(token.brew('I LOVE DOGS', 10))
