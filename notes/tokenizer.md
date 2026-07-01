@@ -63,3 +63,20 @@ Encode() was encoding vocabulary, not the sentence.
 **Solution:**
 
 Provided an input parameter for single sentence for now. And encode the sentence. 
+
+
+## NEXT STEP
+
+Next I created a new function brew() for the purpose of merging, encode, padding, attention mask and decode. 
+
+Not that we can't add them into encode() but I feel like in future during a bug encounter, changing encode() can lead to other bugs generation, in short, keeping it clean.
+
+So the brew will encode, perform padding, attention mask and after-wards will return a dictionary. Why a dictionary? 
+
+Well, to simply print them in one go for now. I will change it something else, if it's called for in the future. Also, I am adding tokens in dictionary for easy understanding of what is going on, since using decode will be a hassle now. 
+
+## OPTIMIZATION
+
+I know this part comes at last, but still I think its good practice. 
+
+So since in training we will be using brew again and again, we don't need to decode it every time. So I am putting decode as a parameter to call it when debugging. 

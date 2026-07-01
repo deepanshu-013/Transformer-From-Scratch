@@ -68,14 +68,33 @@ corpus = [
 #     c[word] = idx + 5
 
 
-c= ['i', 'love', 'dogs']
+c= [1, 2, 3]
 
-print(" ".join(c))
+length = len(c)
+
+# print(" ".join(c))
+
+max_length = 8
+padding = max_length - length
+
+# for i in range(padding):
+#     c.append(0)
+#
+# print(c)
+#
+# c[0:length:1] = [1 for _ in range(length)]
+#
+# print(c)
 
 
+#Need something clever...
+c.extend([0] * padding)
+print(c)
 
+attention = [1] * length + [0] * padding
+print(attention)
 
-
+#Much Better, I guess.
 
 
 
