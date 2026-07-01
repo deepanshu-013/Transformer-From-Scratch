@@ -1,41 +1,38 @@
 class Tokenizer:
 
-    def fit(self, text):
-        self.word_to_id = {'<PAD>': 0,
-                           '<UNK>': 1,
-                           '<CLS>': 2,
-                           '<SEP>': 3,
-                           '<MASK>': 4
+    def fit(self, corpus):
+        self.PAD = 0
+        self.UNK = 1
+        self.CLS = 2
+        self.SEP = 3
+        self.MASK = 4
+        self.word_to_id = {'[PAD]': 0,
+                           '[UNK]': 1,
+                           '[CLS]': 2,
+                           '[SEP]': 3,
+                           '[MASK]': 4
                            }
-        self.id_to_word = {}
-#######----------------Bug: fit() should accept a corpus, not only the string-----------------------########
-        if type(text) is list:
-            for i in text:
-                self.text = i.lower().replace('.', '').split()
-                self.string = ''
-                self.string += self.text
+        self.id_to_word = {v: k for k, v in self.word_to_id.items()}
+        self.unique = set()
 
-            for idx, word in enumerate(self.unique):
-                self.word_to_id[word] = idx + 5
+        if isinstance(corpus, str):
+            corpus = [corpus]
 
-            for word in self.text:
-                self.id_to_word[self.word_to_id[word]] = word
+        for sentence in corpus:
+            self.unique.update(sentence.lower().replace('.', '').split())
 
-        else :
-            self.text = text.lower().replace('.', '').split()
-            self.unique = sorted(set(self.text))
-
-        for idx, word in enumerate(self.unique):
+        for idx, word in enumerate(sorted(self.unique)):
             self.word_to_id[word] = idx + 5
-
-        for word in self.text:
             self.id_to_word[self.word_to_id[word]] = word
 
-    def encode(self):
-        ids = []
 
-        for text in self.text:
+    def encode(self, sentence1):
+        ids = [self.CLS]
+
+        for text in sentence1.lower().replace('.', '').split():
             ids.append(self.word_to_id[text])
+
+        ids.append(self.SEP)
 
         return ids
 
@@ -44,5 +41,6 @@ class Tokenizer:
 
         for _ in token_ids:
             words.append(self.id_to_word[_])
+        print(words)
 
         return " ".join(words)

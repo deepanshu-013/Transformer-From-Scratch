@@ -32,32 +32,45 @@ b = {
 #
 # print(b)
 
-c ={}
-
 corpus = [
     "I love dogs.",
     "Dogs bark.",
     "Cats meow."
 ]
+
 # corpus = [ "I love dogs.", "Dogs bark.", "Cats meow." ] if corpus is list: cant access the if statement even though corpus is list
 # instead we can use type(corpus),
 # but best practice is: isinstance()
 
-if isinstance(corpus, list):
-    print('lol')
-    string = ''
-    for i in corpus:
-        text = i.lower().replace('.', '').split()
-        print(text)
-        string += ''.join(text)
-        print(string)
+# unique = set()
+#
+# if isinstance(corpus, str):
+#     corpus = [corpus]
+#
+# for i in corpus:
+#     j = i.lower().replace('.', '').split()
+#     unique.update(j)
+#
+# print(unique)
 
 
-    for idx, word in enumerate(sorted(set(string))):
-        c[word] = idx + 5
+
+    # print('lol')
+    # string = ''
+    # for i in corpus:
+    #     text = i.lower().replace('.', '').split()
+    #     print(text)
+    #     string += ''.join(text)
+    #     print(string)
 
 
-print(c)
+# for idx, word in enumerate(sorted(unique)):
+#     c[word] = idx + 5
+
+
+c= ['i', 'love', 'dogs']
+
+print(" ".join(c))
 
 
 
