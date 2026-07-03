@@ -1,4 +1,4 @@
-a =[]
+# a =[]
 b = {
     'cls': 0,
     'sep': 1,
@@ -68,14 +68,14 @@ corpus = [
 #     c[word] = idx + 5
 
 
-c= [1, 2, 3]
-
-length = len(c)
-
-# print(" ".join(c))
-
-max_length = 8
-padding = max_length - length
+# c= [1, 2, 3]
+#
+# length = len(c)
+#
+# # print(" ".join(c))
+#
+# max_length = 8
+# padding = max_length - length
 
 # for i in range(padding):
 #     c.append(0)
@@ -88,13 +88,36 @@ padding = max_length - length
 
 
 #Need something clever...
-c.extend([0] * padding)
-print(c)
-
-attention = [1] * length + [0] * padding
-print(attention)
+# c.extend([0] * padding)
+# print(c)
+#
+# attention = [1] * length + [0] * padding
+# print(attention)
 
 #Much Better, I guess.
+
+
+import numpy as np
+
+a = np.array(([1, 2, 3, 4],
+              [5, 6, 7, 8]))
+
+
+
+print(a.shape)
+
+for i in range(a.shape[0]):
+    sin_count = 0
+    cos_count = 0
+    for j in range(a.shape[1]):
+        if j % 2 == 0:
+            sin_count += 1
+            print(sin_count)
+        else:
+            cos_count += 1
+
+
+
 
 
 
