@@ -1,9 +1,6 @@
 from tokenizer import Tokenizer
 from embedding import Embedding
-
-
-
-token = Tokenizer()
+from positional_encoding import PositionalEncoding
 
 corpus = [
     "I love dogs.",
@@ -11,8 +8,19 @@ corpus = [
     "Cats meow."
 ]
 
-token.fit(corpus)
+token = Tokenizer()
 
 embedding = Embedding(5000, 128)
 
-print(token.brew('I LOVE DOGS', 10))
+positional_encoding = PositionalEncoding()
+
+token.fit(corpus)
+input_ids = token.brew('I LOVE DOGS', 10)["input_ids"]
+input_weights = embedding.forward(input_ids)
+pos_end = positional_encoding.forward(input_weights.shape[0], input_weights.shape[1])
+
+
+print(input_ids)
+print(input_weights.shape)
+print(pos_end.shape)
+
