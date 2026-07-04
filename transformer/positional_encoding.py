@@ -11,7 +11,7 @@ class PositionalEncoding:
                 if dim % 2 == 0:
                     positional_encoding[pos, dim] = np.sin(pos/10000**(dim/dimension))
                 else:
-                    positional_encoding[pos, dim] = np.cos(pos/10000**(dim - 1/dimension))
+                    positional_encoding[pos, dim] = np.cos(pos/10000**((dim - 1)/dimension))
 
         return positional_encoding
 
