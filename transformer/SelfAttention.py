@@ -19,15 +19,13 @@ class SelfAttention:
         K = X @ self.WK
         V = X @ self.WV
 
-        attention_score = Q @ K.T
+        attention_weight = Q @ K.T
 
-        attention_score /= np.sqrt(self.d_model)
+        attention_weight /= np.sqrt(self.d_model)
 
-        attention_score = self.softmax(attention_score)
+        attention_weight = self.softmax(attention_weight)
 
-        output = attention_score @ V
-
-
+        output = attention_weight @ V
         return output
 
 
