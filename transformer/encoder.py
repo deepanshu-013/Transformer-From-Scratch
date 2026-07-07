@@ -1,22 +1,20 @@
-from positional_encoding import PositionalEncoding
+
 from SelfAttention import SelfAttention
 from feedforward import FeedForward
+from layernorm import LayerNorm
 
 class Encoder:
     def __init__(self, input_dim=128, hidden_dim=512):
-        self.positional_encoding = PositionalEncoding()
         self.self_attention = SelfAttention()
         self.feedforward = FeedForward(input_dim, hidden_dim)
+        self.layer_norm_1 = LayerNorm(input_dim)
+        self.layer_norm_2 = LayerNorm(input_dim)
 
-    def forward(self, input_weights):
-        positional_encoding = self.positional_encoding.forward(input_weights.shape[0], input_weights.shape[1])
-        X = positional_encoding + input_weights
+    def forward(self, X):
         attention_output = self.self_attention.forward(X)
-        X = X + attention_output  # Residual connection
-        #Layer Normalization will be added here
+        X = self.layer_norm_1.forward(X + attention_output) # Layer Normalization 
         feedforward_output = self.feedforward.forward(X)
-        X = X + feedforward_output  # Residual connection
-        #Layer Normalization will be added here
+        X = self.layer_norm_2.forward(X + feedforward_output) # Layer Normalization
         return X
 
 
