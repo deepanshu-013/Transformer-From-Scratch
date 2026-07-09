@@ -1,11 +1,12 @@
 class Tokenizer:
-
-    def fit(self, corpus):
+    def __init__(self):
         self.PAD = 0
         self.UNK = 1
         self.CLS = 2
         self.SEP = 3
         self.MASK = 4
+
+    def fit(self, corpus):
         self.word_to_id = {'[PAD]': 0,
                            '[UNK]': 1,
                            '[CLS]': 2,
