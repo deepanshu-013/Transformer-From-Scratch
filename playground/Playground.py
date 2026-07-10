@@ -97,35 +97,72 @@ corpus = [
 #Much Better, I guess.
 
 
-import numpy as np
+# import numpy as np
 
-a = np.array(([1, 2, 3, 4],
-              [5, 6, 7, 8]))
+# a = np.array([1.0, 0.36787944, 0.13533528])
+# print(a / np.sum(np.exp(a), axis=0, keepdims=True))
 
+# print((a / (1.0+(0.36787944)+(0.13533528))).sum())
 
-
-print(a.shape)
-
-for i in range(a.shape[0]):
-    sin_count = 0
-    cos_count = 0
-    for j in range(a.shape[1]):
-        if j % 2 == 0:
-            sin_count += 1
-            print(sin_count)
-        else:
-            cos_count += 1
+# print(0.1 + 0.2) #crazy answer find
 
 
+# # print(a.shape)
+
+# # for i in range(a.shape[0]):
+# #     sin_count = 0
+# #     cos_count = 0
+# #     for j in range(a.shape[1]):
+# #         if j % 2 == 0:
+# #             sin_count += 1
+# #             print(sin_count)
+# #         else:
+# #             cos_count += 1
+
+# print(a[0])
+
+class Tokenizer:
+    def __init__(self):
+        self.PAD = 0
+        self.UNK = 1
+        self.CLS = 2
+        self.SEP = 3
+        self.MASK = 4
+
+tokenizer = Tokenizer()
+
+input_ids = [2, 8, 9, 7, 3, 0, 0, 0, 0, 0]
+
+masked_input_ids = []
+labels = []
+
+valid_positions = []
+num_to_mask = max(1, round((len(input_ids) - 2) * 0.15))
+
+for position, token_id in enumerate(input_ids):
+            masked_input_ids.append(token_id)
+            labels.append(-100)
+            if token_id not in [tokenizer.CLS, tokenizer.SEP, tokenizer.PAD]:
+                valid_positions.append(position) #Before we were pushing the token id instead of the index. 
+
+print(valid_positions)
+print(masked_input_ids)
+print(labels)
+
+import random as rn 
+print("num to mask:", num_to_mask)
+mask_indices = rn.sample(valid_positions, num_to_mask)
+print(mask_indices)
+
+for idx in mask_indices:
+    masked_input_ids[idx] = tokenizer.MASK
+    labels[idx] = input_ids[idx] #Instead of changing the index of mask_indices, we are using the mask_indices as the index and masking the wrong word. 
 
 
+print(masked_input_ids)
+print(labels)
 
-
-
-
-
-
-
+##--------Good now its fixed----##
 
 
 
