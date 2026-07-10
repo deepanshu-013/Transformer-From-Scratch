@@ -1,5 +1,6 @@
 import random as rn
 from tokenizer import Tokenizer
+rn.seed(42)
 
 
 class MLMDataset:
@@ -12,11 +13,11 @@ class MLMDataset:
         num_to_mask = max(1, round((len(input_ids) - 2) * mask_probability))
         valid_positions = []
 
-        for token_id in input_ids:
+        for position, token_id in enumerate(input_ids):
             masked_input_ids.append(token_id)
             labels.append(-100)
             if token_id not in [self.tokenizer.CLS, self.tokenizer.SEP, self.tokenizer.PAD]:
-                valid_positions.append(token_id)
+                valid_positions.append(position)
 
 
         mask_indices = rn.sample(valid_positions, num_to_mask)
