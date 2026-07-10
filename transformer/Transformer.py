@@ -4,6 +4,7 @@ from encoder import Encoder
 from positional_encoding import PositionalEncoding
 from lm_head import LMHead
 from mlm_dataset import MLMDataset
+from loss import CrossEntropyLoss
 
 class Transformer:
     def __init__(self, num_layers = 2):
@@ -36,6 +37,8 @@ transformer = Transformer(num_layers=2)
 
 lm_head = LMHead(vocab_size=5000, embedding_dim=128)
 
+ce_loss = CrossEntropyLoss()
+
 token.fit(corpus)
 input_ids = token.brew('I LOVE DOGS', 10)["input_ids"]
 masked_input_ids, labels = mlm_dataset.prepare(input_ids) #labels will be used for loss calculation during training
@@ -44,6 +47,10 @@ positional_encoding = position.forward(input_weights.shape[0], input_weights.sha
 X = positional_encoding + input_weights
 X = transformer.forward(X)
 X = lm_head.forward(X) 
-print(X.shape)
+loss = ce_loss.forward(X, labels)
+print(input_ids)
+print(masked_input_ids)
+print(labels)
+print(loss)
 
 
