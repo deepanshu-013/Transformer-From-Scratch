@@ -49,4 +49,10 @@ In playground.py I calculated 0.1 + 0.2 to personally test it and the answer I g
 
 _Amazing!_
 
+Now I have added the backward function in the loss. 
 
+Just need to check if it returns the exact shape or soemthing else before moving on. 
+
+Got it, it gives a shpe of (10, 5000). 
+
+On to the Linear Layer now.

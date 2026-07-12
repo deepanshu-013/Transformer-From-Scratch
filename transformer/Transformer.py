@@ -48,9 +48,7 @@ X = positional_encoding + input_weights
 X = transformer.forward(X)
 X = lm_head.forward(X) 
 loss = ce_loss.forward(X, labels)
-print(input_ids)
-print(masked_input_ids)
-print(labels)
-print(loss)
+
+print(ce_loss.backward())
 
 
