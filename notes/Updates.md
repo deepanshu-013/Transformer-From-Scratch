@@ -102,9 +102,21 @@ I read the documentation of BERT and found that it will be equal to $Softmax_i -
 
 I need to somehow merge the two cases, but I am unable to do so, maybe it require something I dont know. I am confused. 
 
+Got the answer, And I will be real, I did google to find what is a function that can combine two cases together and it first gave me 
 
+**Indicator Function**
 
+But that didnt work out too well.
 
+So after a little bit more research on wiki, can across
+
+**Kronecker delta**
+
+Than it stuck me that i studies a little bit about kronecker delta when I was making my FNN last year. 
+
+Now I have the fully dervied equation, 
+
+$\frac{dL}{dZ_i} = S_i - y_i$
 
 
     
