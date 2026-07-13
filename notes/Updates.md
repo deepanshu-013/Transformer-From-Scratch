@@ -119,4 +119,41 @@ Now I have the fully dervied equation,
 $\frac{dL}{dZ_i} = S_i - y_i$
 
 
-    
+## OPTIMIZER
+
+Run the optimizer once normally and gave,
+
+8.20811257029584 - first pass
+
+8.079217435084834 - after SGD second pass
+
+Now before moving on to the Transformer Backward Pass, I would run epochs and test how far can we bring down the loss.
+
+My institution is learning a single sentence "I LOVE DOGS" can be done by just updating LM Head weights and biases. Basically testing if we can over-fit it on a single sentence. 
+
+So I will be changing the corpus to a single sentence. 
+
+Let's see.
+
+
+Amazed to see that after 100 epoches we are getting the loss = 1.1504247663774732. 
+
+So I went back and ran a test for 74 seconds and the loss upon overfitting was 0.225074134944918, from LM Head updation alone. 
+
+It's proof that the optimization pipeline works.
+
+## BUG
+
+A bug was found during the sanity check. 
+
+The bug was I forget to relate the Vocabulary size to the tokenizer.
+
+Hence the vocab size was 5000, and tokenizer has only 8-9 words in vocab, leading the model to prediciting _Ghost Words_ which never exist. 
+
+Now it is fixed, the embedding layer and LM Head depend on tokenizer for vocab size. 
+
+As a result the loss has decreased significantly. 
+
+At this point, we've built a complete trainable neural network.
+
+It's just that only the last layer is trainable. 😂
