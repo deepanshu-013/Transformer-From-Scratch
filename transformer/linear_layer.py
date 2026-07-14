@@ -13,3 +13,4 @@ class Linear:
         self.d_weights = np.dot(self.X.T, d_logits)
         self.d_biases = np.sum(d_logits, axis=0, keepdims=True)
         self.d_X = np.dot(d_logits, self.weights.T)
+        return self.d_X
