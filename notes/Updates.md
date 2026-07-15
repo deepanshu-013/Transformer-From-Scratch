@@ -157,3 +157,113 @@ As a result the loss has decreased significantly.
 At this point, we've built a complete trainable neural network.
 
 It's just that only the last layer is trainable. 😂
+
+Okay, so we have added the Feed Forward backward pass as well. 
+
+Now it's time for the layer norm. I thought it might be a walk in the park like the previous backward passes. 
+
+But man I was wrong. 
+
+Okay so in forward pass, we are doing something like this $self.gamma * normalized_X + self.beta$
+
+You see here,
+
+self.gamma is of shape (128,1)
+
+and
+
+normalized_X is of shape (10, 128)
+
+Mathematically, it is not possible to multiply them. 
+
+But NumPy uses broadcasting and duplicates the entire single column 10 times to match the row of normalized_X.
+
+Known as element wise multipliaction. 
+
+It was very confusing at first but now I understand it. 
+
+
+Okay its getting quite serious now, 
+
+I mean calculating, 
+
+self.d_gamma = np.sum(doutput * self.normalized_X, axis=0)
+
+self.d_beta = np.sum(doutput, axis=0)
+
+d_normalized_X = doutput * self.gamma
+
+This was easy but now since everything indirectly depends on X, and X influences both the mean, standard deviation and Normalized X. 
+
+In order  to find the $\frac{dL}{dX}$ we will need to find the derivation of every path that depends on X. 
+
+
+Backward
+=
+The input (X) first produces the mean and variance, which are then used to compute the standard deviation, and finally the normalized output. As a result, each input feature influences the loss in more than one way.
+
+Hence we have two path to compute, 
+$
+\frac{\partial L}{\partial X}
+$
+
+**Path 1 (Direct)**
+
+$\frac{\partial L}{\partial \text{Centered}}
+\cdot
+\frac{\partial \text{Centered}}{\partial X}
+$
++
+$\frac{\partial L}{\partial \text{Variance}}
+\cdot
+\frac{\partial \text{Variance}}{\partial X}
+$
++
+$\frac{\partial L}{\partial \text{Mean}}
+\cdot
+\frac{\partial \text{Mean}}{\partial X}
+$ = 
+$
+\frac{\partial L}{\partial X}
+$
+
+**Path 2 (Indirect)**
+
+$\frac{\partial L}{\partial \hat{X}}
+\cdot
+\frac{\partial \hat{X}}{\partial X}$
++
+$\sum_{k = 1}^{N}
+\frac{\partial L}{\partial \hat{X_k}}
+\cdot
+\frac{\partial \hat{X_k}}{\partial \mu}
+\cdot
+\frac{\partial \mu}{\partial X}$
++
+$\sum_{k = 1}^{N}
+\frac{\partial L}{\partial \hat{X_k}}
+\cdot
+\frac{\partial \hat{X_k}}{\partial \sigma}
+\cdot
+\frac{\partial \sigma}{\partial X}$=
+$
+\frac{\partial L}{\partial X}
+$
+
+**_Backward Pass: Two Paths to dInput_**
+
+_Path 1: Direct_
+
+Calculates and stores intermediate gradients for every operation (d_mean, d_var, d_std). It is intuitive and easy to debug, but creates many temporary arrays, making it slow and memory-heavy.
+
+_Path 2: Indirect_
+
+Applies the multivariable chain rule and simplifies the math. The intermediate gradients (d_mean, d_var) cancel out, collapsing into a single, elegant equation. This is the standard implementation because it requires fewer operations and is significantly faster.
+
+
+Personally I prefer Path 2 not only because it;s fast and few operation rather how
+
+ _Paul Dirac famously stated that "It is more important to have beauty in one's equations than to have them fit experiment"_
+
+
+ Now, I ned to derive each one of them, so I will update backward function tomorrow. 
