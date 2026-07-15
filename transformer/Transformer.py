@@ -15,15 +15,14 @@ class SGD:
         layer.biases += -self.learning * layer.d_biases
 
 class Transformer:
-    def __init__(self, num_layers = 2):
-        self.encoders = [
-            Encoder() for _ in range(num_layers)
-        ]
+    def __init__(self, num_layers = 1):
+        self.encoders =  Encoder() 
 
     def forward(self, X):
-        for encoder in self.encoders:
-            X = encoder.forward(X)
-        return X
+        # for encoder in self.encoders:
+        #     X = encoder.forward(X)
+        # return X
+        return self.encoders.forward(X)
 
 # corpus = [
 #     "I love dogs.",
@@ -35,7 +34,6 @@ token = Tokenizer()
 
 mlm_dataset = MLMDataset()
 
-encoder = Encoder(input_dim=128, hidden_dim=512)
 
 position = PositionalEncoding()
 
@@ -76,21 +74,26 @@ import numpy as np
 #         print(token.id_to_word[i])
 # print(loss)
 
-while epoches != 100:
-    dlogits = ce_loss.backward()
-    lm_head.linear.backward(dlogits)
-    optimizer.update(lm_head.linear)
-    logits = lm_head.forward(X)
-    loss, row = ce_loss.forward(logits, labels)
-    epoches += 1
-    print(loss)
+# while epoches != 100:
+#     dlogits = ce_loss.backward()
+#     lm_head.linear.backward(dlogits)
+#     optimizer.update(lm_head.linear)
+#     logits = lm_head.forward(X)
+#     loss, row = ce_loss.forward(logits, labels)
+#     epoches += 1
+#     print(loss)
 
-top_5 = np.sort(row)[-5:]
-print(top_5)
-top5_indices = np.argpartition(row, -5)[-5:] # To get the top 5 values in descending order.
-top5_list = top5_indices.tolist()
-print(top5_indices)
-for i in token.id_to_word:
-    if i in top5_list:
-        print(token.id_to_word[i]) # Seeing what are the top 5 predicitions.
+# top_5 = np.sort(row)[-5:]
+# print(top_5)
+# top5_indices = np.argpartition(row, -5)[-5:] # To get the top 5 values in descending order.
+# top5_list = top5_indices.tolist()
+# print(top5_indices)
+# for i in token.id_to_word:
+#     if i in top5_list:
+#         print(token.id_to_word[i]) # Seeing what are the top 5 predicitions.
+
+dlogits = ce_loss.backward()
+d_X = lm_head.linear.backward(dlogits)
+doutput = transformer.encoders.feedforward.backward(d_X)
+print(doutput.shape)
 

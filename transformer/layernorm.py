@@ -7,7 +7,16 @@ class LayerNorm:
         self.beta = np.zeros((d_model,))
 
     def forward(self, X):
-        mean = np.mean(X, axis=1, keepdims=True)
-        variance = np.var(X, axis=1, keepdims=True)
-        normalized_X = (X - mean) / np.sqrt(variance + self.eps)
-        return self.gamma * normalized_X + self.beta
+        self.X = X
+        self.mean = np.mean(X, axis=1, keepdims=True)
+        self.variance = np.var(X, axis=1, keepdims=True)
+        self.centered = (X - self.mean)
+        self.std = np.sqrt(self.variance + self.eps)
+        self.normalized_X =  self.centered / self.std 
+        return self.gamma * self.normalized_X + self.beta
+
+    def backward(self, doutput):
+        self.d_gamma = np.sum(doutput * self.normalized_X, axis=0)
+        self.d_beta = np.sum(doutput, axis=0)
+        d_normalized_X = doutput * self.gamma
+
