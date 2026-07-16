@@ -17,6 +17,13 @@ class Encoder:
         X = self.layer_norm_2.forward(X + feedforward_output) # Layer Normalization
         return X
 
+    def backward(self, d_output):
+        d_X = self.layer_norm_2.backward(d_output)
+        dX_ff =self.feedforward.backward(d_X)
+        d_X = d_X + dX_ff
+        d_X = self.layer_norm_1.backward(d_X)
+        d_output = d_X + d_attention # which we haven't calculated yet.
+
 
 
 
