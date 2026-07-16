@@ -266,4 +266,8 @@ Personally I prefer Path 2 not only because it;s fast and few operation rather h
  _Paul Dirac famously stated that "It is more important to have beauty in one's equations than to have them fit experiment"_
 
 
- Now, I ned to derive each one of them, so I will update backward function tomorrow. 
+ Now, I need to derive each one of them, so I will update backward function tomorrow. 
+ 
+The backward function in Layer Norm looks absolutely beautiful. 
+
+Now the main part is to merge them into the Encoder. Feed Forward and Layer Norm both.
