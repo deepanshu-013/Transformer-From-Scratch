@@ -6,94 +6,74 @@ from lm_head import LMHead
 from mlm_dataset import MLMDataset
 from loss import CrossEntropyLoss
 
-## For testing the pipeline and chekcing is model is learning or not, later will add it to separate file. ##
-class SGD:
-    def __init__(self, learning_rate=0.001):
-        self.learning = learning_rate
-    def update(self, layer):
-        layer.weights += -self.learning * layer.d_weights
-        layer.biases += -self.learning * layer.d_biases
+
 
 class Transformer:
-    def __init__(self, num_layers = 1):
-        self.encoders =  Encoder() 
+    def __init__(self, vocab_size, d_model = 256, num_layers = 1):
+        self.mlm_dataset = MLMDataset()
+        self.embedding = Embedding(vocab_size, self.d_model)
+        self.positional_encoding = PositionalEncoding()
+
+        # Create Multiple Encoder as per the given value of num_layers
+        self.encoders =  [Encoder(input_dim= d_model, hidden_dim=1024) for _ in range(num_layers)]
+
+        self.lm_head = LMHead(vocab_size, d_model)
 
     def forward(self, X):
-        # for encoder in self.encoders:
-        #     X = encoder.forward(X)
-        # return X
-        return self.encoders.forward(X)
+        # Embedding layer forward pass
+        X = self.embedding.forward(X)
 
-# corpus = [
-#     "I love dogs.",
-#     "Dogs bark.",
-#     "Cats meow."
-# ]
+        # Positional encoding
+        positional_encoding = self.positional_encoding.forward(X)
 
-token = Tokenizer()
+        # Adding the positional encoding with the embedding.
+        X = X + positional_encoding
 
-mlm_dataset = MLMDataset()
+        # Encoders Layer
+        for encoder in self.encoders:
+            X = encoder.forward(X)
 
+        # LM Head
+        X =self.lm_head.forward(X)
 
-position = PositionalEncoding()
+        return X
 
-transformer = Transformer(num_layers=2)
+    def backward(self, d_output):
+        # LM Head backward pass
+        dX = self.lm_head.backward(d_output)
+
+        # Encoders backward
+        for encoder in reversed(self.encoders):
+            dX = encoder.backward(dX)
+
+        # Embedding backward
+        return self.embedding.backward(dX)
+
+corpus = [
+    "I love dogs.",
+    "Dogs bark.",
+    "Cats meow."
+]
+
+tokenizer = Tokenizer()
+tokenizer.fit(corpus)
+
+vocab_size = len(tokenizer.word_to_id)
+
+transformer = Transformer(vocab_size, d_model= 256, num_layers= 4)
 
 ce_loss = CrossEntropyLoss()
 
-optimizer = SGD()
+# Since brew returns a dictionary.
+dictionary = tokenizer.brew("I love dogs.", max_length=10)
 
-epoches = 0
+X, labels = transformer.mlm_dataset.prepare(dictionary[0])
 
-token.fit('I LOVE DOGS') # Trained on single sentence to check the LM Head and the whole pipeline
-
-embedding = Embedding(len(token.word_to_id), 128) # Made the embedding layer depend on the tokenizer
-
-dic = token.brew('I LOVE DOGS', 10, decode=True)
-input_ids = dic["input_ids"]
-masked_input_ids, labels = mlm_dataset.prepare(input_ids) # labels will be used for loss calculation during training
-input_weights = embedding.forward(masked_input_ids)
-positional_encoding = position.forward(input_weights.shape[0], input_weights.shape[1])
-X = positional_encoding + input_weights
 X = transformer.forward(X)
 
-lm_head = LMHead(len(token.word_to_id), embedding_dim=128) # Made the LM Head layer depend on the tokenizer
+loss = ce_loss.forward(X, labels)
 
-logits = lm_head.forward(X) 
-loss, row = ce_loss.forward(logits, labels)
+d_logits = ce_loss.backward()
 
-##--------------------------------------------- For debugging and checking the pipeline -----------------------------------------##
-import numpy as np
-# top_5 = np.sort(row)[-5:]
-# print(top_5)
-# top5_indices = np.argpartition(row, -5)[-5:]
-# top5_list = top5_indices.tolist()
-# print(top5_indices)
-# for i in token.id_to_word:
-#     if i in top5_list:
-#         print(token.id_to_word[i])
-# print(loss)
-
-# while epoches != 100:
-#     dlogits = ce_loss.backward()
-#     lm_head.linear.backward(dlogits)
-#     optimizer.update(lm_head.linear)
-#     logits = lm_head.forward(X)
-#     loss, row = ce_loss.forward(logits, labels)
-#     epoches += 1
-#     print(loss)
-
-# top_5 = np.sort(row)[-5:]
-# print(top_5)
-# top5_indices = np.argpartition(row, -5)[-5:] # To get the top 5 values in descending order.
-# top5_list = top5_indices.tolist()
-# print(top5_indices)
-# for i in token.id_to_word:
-#     if i in top5_list:
-#         print(token.id_to_word[i]) # Seeing what are the top 5 predicitions.
-
-dlogits = ce_loss.backward()
-d_X = lm_head.linear.backward(dlogits)
-doutput = transformer.encoders.feedforward.backward(d_X)
-print(doutput.shape)
+transformer.backward(d_logits)
 
