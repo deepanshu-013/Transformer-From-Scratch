@@ -2,8 +2,9 @@ import numpy as np
 
 class PositionalEncoding:
     @staticmethod
-    def forward(sequence_length, dimension):
-
+    def forward(X):
+        sequence_length = X.shape[0]
+        dimension = X.shape[1]
         positional_encoding = np.zeros((sequence_length, dimension), dtype="float32")
 
         for pos in range(sequence_length):
