@@ -18,11 +18,10 @@ class CrossEntropyLoss:
                 correct_class_prob = self.softmax[position, label]
                 total_loss += -np.log(correct_class_prob)
                 self.total_mask_count += 1
-                row  = self.logits[position] ## I have the row to check for the largest logits value, I am leaving it as it is for future debugging. 
         if self.total_mask_count > 0:
             loss = total_loss / self.total_mask_count
-        return loss, row
-###########################
+        return loss
+
     def backward(self):
         d_logits = self.softmax.copy()
         for position, label in enumerate(self.labels):

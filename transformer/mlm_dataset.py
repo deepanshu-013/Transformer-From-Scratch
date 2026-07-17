@@ -1,6 +1,5 @@
 import random as rn
 from tokenizer import Tokenizer
-rn.seed(42)
 
 
 class MLMDataset:
