@@ -271,3 +271,9 @@ Personally I prefer Path 2 not only because it;s fast and few operation rather h
 The backward function in Layer Norm looks absolutely beautiful. 
 
 Now the main part is to merge them into the Encoder. Feed Forward and Layer Norm both.
+
+Encoder backward has been fully coded. 
+
+However, it did take quite some understanding and time to solve the softmax derivation in Self Attention. 
+
+But at last we are here. Backward function for the attention is fully functionally now and has been merged to Encoder.

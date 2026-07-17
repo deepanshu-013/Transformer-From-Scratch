@@ -18,11 +18,13 @@ class Encoder:
         return X
 
     def backward(self, d_output):
-        d_X = self.layer_norm_2.backward(d_output)
-        dX_ff =self.feedforward.backward(d_X)
-        d_X = d_X + dX_ff
-        d_X = self.layer_norm_1.backward(d_X)
-        d_output = d_X + d_attention # which we haven't calculated yet.
+        d_layer_norm2 = self.layer_norm_2.backward(d_output)
+        dX_ff =self.feedforward.backward(d_layer_norm2)
+        d_residual2 = d_layer_norm2 + dX_ff
+        d_layer_norm1 = self.layer_norm_1.backward(d_residual2)
+        d_input= d_layer_norm1+ self.self_attention.backward(d_layer_norm1)
+
+        return d_input
 
 
 
