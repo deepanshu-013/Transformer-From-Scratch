@@ -5,7 +5,7 @@ from layernorm import LayerNorm
 
 class Encoder:
     def __init__(self, input_dim=128, hidden_dim=512):
-        self.self_attention = SelfAttention()
+        self.self_attention = SelfAttention(input_dim)
         self.feedforward = FeedForward(input_dim, hidden_dim)
         self.layer_norm_1 = LayerNorm(input_dim)
         self.layer_norm_2 = LayerNorm(input_dim)
