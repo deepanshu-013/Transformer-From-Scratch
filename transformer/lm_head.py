@@ -7,3 +7,7 @@ class LMHead:
     def forward(self, X):
         logits = self.linear.forward(X)
         return logits
+
+    def backward(self, d_output):
+        d_logits = self.linear.backward(d_output)
+        return d_logits
