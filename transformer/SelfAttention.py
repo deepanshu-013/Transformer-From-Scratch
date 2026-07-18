@@ -6,7 +6,7 @@ class SelfAttention:
         self.d_model = d_model
         self.WQ = np.random.randn(d_model, d_model) * 0.02
         self.WK = np.random.randn(d_model, d_model) * 0.02
-        self.WV = np.random.randn(d_model, d_model) * 0.02
+        self.WV = np.random.randn(d_model, d_model) * 0.01
 
     @staticmethod
     def softmax(x):
