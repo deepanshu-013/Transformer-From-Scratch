@@ -1,3 +1,4 @@
+import numpy as np
 import random as rn
 from tokenizer import Tokenizer
 
@@ -24,8 +25,7 @@ class MLMDataset:
             masked_input_ids[idx] = self.tokenizer.MASK
             labels[idx] = input_ids[idx]
 
-        return masked_input_ids, labels
-
+        return np.array(masked_input_ids), np.array(labels) # Were getting returned as list instead of np array.
     
 
 

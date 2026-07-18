@@ -26,3 +26,11 @@ class LayerNorm:
         d_input = 1.0/self.std * (d_normalized_X - mean_d_normalized_X - self.normalized_X * mean_d_normalized_X_normalized_X) # Absolute Beauty!
 
         return d_input
+
+    def update(self, learning_rate):
+        self.gamma -= learning_rate * self.d_gamma
+        self.beta -= learning_rate * self.d_beta
+
+    def zero_grad(self):
+        self.d_gamma = np.zeros_like(self.gamma)
+        self.d_beta = np.zeros_like(self.beta)

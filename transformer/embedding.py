@@ -1,11 +1,8 @@
 import numpy as np
-import random as rnd
-
 
 class Embedding:
 
     def __init__(self, vocab_size, embedding_dim):
-        np.random.seed(42)
         self.weights = np.random.randn(vocab_size, embedding_dim) * 0.02
 
     def forward(self, token_ids):
@@ -17,3 +14,10 @@ class Embedding:
 
         np.add.at(self.d_weights, self.token_ids, d_output)
         #using add.at to avoid overwriting the gradient if a word has appeared twice or more.
+
+    def update(self, learning_rate):
+        self.weights = self.weights - learning_rate * self.d_weights
+
+    def zero_grad(self):
+        self.d_weights = np.zeros_like(self.weights)
+

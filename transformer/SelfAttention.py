@@ -13,7 +13,8 @@ class SelfAttention:
         e_x = np.exp(x - np.max(x,axis=1, keepdims=True))
         return e_x / e_x.sum(axis=1, keepdims=True)
 
-    def forward(self, X):
+    def forward(self, X, attention_mask):
+        self.attention_mask = np.array(attention_mask)
         self.X = X
         self.Q = X @ self.WQ
         self.K = X @ self.WK
@@ -23,9 +24,12 @@ class SelfAttention:
 
         scaled_scores = raw_scores/np.sqrt(self.d_model)
 
+        scaled_scores[:, attention_mask == 0] = -1e9
+
         self.A = self.softmax(scaled_scores)
 
         self.output = self.A @ self.V
+        self.output[self.attention_mask == 0] = 0
         return self.output
 
     def backward(self, doutput):
@@ -36,6 +40,7 @@ class SelfAttention:
         # Softmax Backward
         sum_dA_A = np.sum(d_A * self.A, axis=1, keepdims=True)
         d_softmax_A = self.A * (d_A - sum_dA_A)
+        d_softmax_A[:, self.attention_mask == 0] = 0
 
         # Scalar backward
         d_score = d_softmax_A / np.sqrt(self.d_model)
@@ -54,9 +59,25 @@ class SelfAttention:
         dX_K = d_K @ np.transpose(self.WK)
         dX_V = d_V @ np.transpose(self.WV)
 
+        mask = self.attention_mask[:, None]
+
+        dX_Q *= mask
+        dX_K *= mask
+        dX_V *= mask
+
         # True gradient
         d_X = dX_Q + dX_K + dX_V
         return d_X
+
+    def update(self, learning_rate):
+        self.WQ -= learning_rate * self.dWQ
+        self.WK -= learning_rate * self.dWK
+        self.WV -= learning_rate * self.dWV
+
+    def zero_grad(self):
+        self.dWQ = np.zeros_like(self.WQ)
+        self.dWK = np.zeros_like(self.WK)
+        self.dWV = np.zeros_like(self.WV)
 
 
 

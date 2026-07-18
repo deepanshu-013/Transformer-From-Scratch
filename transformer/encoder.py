@@ -10,8 +10,8 @@ class Encoder:
         self.layer_norm_1 = LayerNorm(input_dim)
         self.layer_norm_2 = LayerNorm(input_dim)
 
-    def forward(self, X):
-        attention_output = self.self_attention.forward(X)
+    def forward(self, X, attention_mask):
+        attention_output = self.self_attention.forward(X, attention_mask)
         X = self.layer_norm_1.forward(X + attention_output) # Layer Normalization 
         feedforward_output = self.feedforward.forward(X)
         X = self.layer_norm_2.forward(X + feedforward_output) # Layer Normalization
@@ -26,36 +26,14 @@ class Encoder:
 
         return d_input
 
+    def update(self, learning_rate):
+        self.layer_norm_2.update(learning_rate)
+        self.feedforward.update(learning_rate)
+        self.layer_norm_1.update(learning_rate)
+        self.self_attention.update(learning_rate)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def zero_grad(self):
+        self.self_attention.zero_grad()
+        self.feedforward.zero_grad()
+        self.layer_norm_1.zero_grad()
+        self.layer_norm_2.zero_grad()
