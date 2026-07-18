@@ -1,9 +1,9 @@
 import numpy as np
 
 class Linear:
-    def __init__(self, embedding_dim, vocab_size):
-        self.weights = np.random.randn(embedding_dim, vocab_size) * 0.02
-        self.biases = np.zeros((1, vocab_size))
+    def __init__(self, embedding_weights):
+        self.weights = embedding_weights.T
+        self.biases = np.zeros((1, self.weights.shape[1]))
 
     def forward(self, X):
         self.X = X
