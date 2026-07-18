@@ -24,3 +24,8 @@ total_loss += -np.log(correct_class_prob)
 
 So we need to clip the probability so it never becomes zero again and let me decrease the learning rate as well, LR = 0.001.
 
+There is problem now, after one to many runs, 
+
+the loss if getting saturated and changing the dimensions and checking everything does nothing. Even changing the learning rate from 0.001 to 0.01 barely changes the loss. 
+
+I dont know what i causing the saturation. 
