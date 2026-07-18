@@ -5,21 +5,22 @@ from positional_encoding import PositionalEncoding
 from lm_head import LMHead
 from mlm_dataset import MLMDataset
 from loss import CrossEntropyLoss
-
-
+from sgd import SGD
+import numpy as np
+import random as rn
 
 class Transformer:
     def __init__(self, vocab_size, d_model = 256, num_layers = 1):
         self.mlm_dataset = MLMDataset()
-        self.embedding = Embedding(vocab_size, self.d_model)
+        self.embedding = Embedding(vocab_size, d_model)
         self.positional_encoding = PositionalEncoding()
 
         # Create Multiple Encoder as per the given value of num_layers
-        self.encoders =  [Encoder(input_dim= d_model, hidden_dim=1024) for _ in range(num_layers)]
+        self.encoders =  [Encoder(input_dim= d_model, hidden_dim=128) for _ in range(num_layers)]
 
         self.lm_head = LMHead(vocab_size, d_model)
 
-    def forward(self, X):
+    def forward(self, X, attention_mask):
         # Embedding layer forward pass
         X = self.embedding.forward(X)
 
@@ -31,7 +32,7 @@ class Transformer:
 
         # Encoders Layer
         for encoder in self.encoders:
-            X = encoder.forward(X)
+            X = encoder.forward(X, attention_mask)
 
         # LM Head
         X =self.lm_head.forward(X)
@@ -47,12 +48,50 @@ class Transformer:
             dX = encoder.backward(dX)
 
         # Embedding backward
-        return self.embedding.backward(dX)
+        self.embedding.backward(dX)
+
+    def update(self, learning_rate):
+        self.lm_head.update(learning_rate)
+
+        for encoder in self.encoders:
+            encoder.update(learning_rate)
+
+        self.embedding.update(learning_rate)
+
+    def zero_grad(self):
+        self.lm_head.zero_grad()
+
+        self.embedding.zero_grad()
+
+        for encoder in self.encoders:
+            encoder.zero_grad()
+
+    @staticmethod
+    def train(input_ids, attention_mask):
+        X, labels = transformer.mlm_dataset.prepare(input_ids)
+
+        optimizer.zero_grad()
+
+        logits = transformer.forward(X, attention_mask)
+
+        loss = ce_loss.forward(logits, labels)
+
+        d_logits = ce_loss.backward()
+
+        transformer.backward(d_logits)
+
+        optimizer.step()
+
+        return X, logits, loss
 
 corpus = [
-    "I love dogs.",
-    "Dogs bark.",
-    "Cats meow."
+    'I love dogs.',
+    'Dogs bark loudly.',
+    'Cats chase mice.',
+    'Birds can fly.',
+    'Fish swim underwater.',
+    'The sun is bright.',
+    'The moon shines at night.'
 ]
 
 tokenizer = Tokenizer()
@@ -60,20 +99,40 @@ tokenizer.fit(corpus)
 
 vocab_size = len(tokenizer.word_to_id)
 
-transformer = Transformer(vocab_size, d_model= 256, num_layers= 4)
+transformer = Transformer(vocab_size, d_model= 64, num_layers= 1)
 
 ce_loss = CrossEntropyLoss()
 
-# Since brew returns a dictionary.
-dictionary = tokenizer.brew("I love dogs.", max_length=10)
+optimizer = SGD(model = transformer, learning_rate= 0.01)
 
-X, labels = transformer.mlm_dataset.prepare(dictionary[0])
+total_loss = []
 
-X = transformer.forward(X)
+# Training Loop
+for epoch in range(500):
+    epoch_loss = 0
+    rn.shuffle(corpus)
 
-loss = ce_loss.forward(X, labels)
+    for sentence in corpus:
+        dictionary = tokenizer.brew(sentence, max_length=10)
+        X, logits, loss = transformer.train(dictionary['input_ids'], dictionary['attention_mask'])
+        total_loss.append(loss)
+        epoch_loss += loss
+    if epoch % 20 == 0:
+        print("Embedding :", np.linalg.norm(transformer.embedding.d_weights))
 
-d_logits = ce_loss.backward()
+        for i, encoder in enumerate(transformer.encoders):
+            print(f"Encoder {i}")
 
-transformer.backward(d_logits)
+            print("WQ :", np.linalg.norm(encoder.self_attention.dWQ))
+            print("WK :", np.linalg.norm(encoder.self_attention.dWK))
+            print("WV :", np.linalg.norm(encoder.self_attention.dWV))
+
+            print("FF1:", np.linalg.norm(encoder.feedforward.dweights1))
+            print("FF2:", np.linalg.norm(encoder.feedforward.dweights2))
+
+        print("LM :", np.linalg.norm(transformer.lm_head.linear.d_weights))
+        print(
+            f"Epoch {epoch:3d}",
+            f"loss: {epoch_loss / len(corpus):.3f}"
+        )
 

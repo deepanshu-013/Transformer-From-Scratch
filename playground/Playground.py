@@ -1,4 +1,6 @@
 # a =[]
+import numpy as np
+
 b = {
     'cls': 0,
     'sep': 1,
@@ -131,39 +133,39 @@ class Tokenizer:
 
 tokenizer = Tokenizer()
 
-input_ids = [2, 8, 9, 7, 3, 0, 0, 0, 0, 0]
+input_ids = np.random.randn(128, 128)
+print(input_ids.zeros_())
 
-masked_input_ids = []
-labels = []
-
-valid_positions = []
-num_to_mask = max(1, round((len(input_ids) - 2) * 0.15))
-
-for position, token_id in enumerate(input_ids):
-            masked_input_ids.append(token_id)
-            labels.append(-100)
-            if token_id not in [tokenizer.CLS, tokenizer.SEP, tokenizer.PAD]:
-                valid_positions.append(position) #Before we were pushing the token id instead of the index. 
-
-print(valid_positions)
-print(masked_input_ids)
-print(labels)
-
-import random as rn 
-print("num to mask:", num_to_mask)
-mask_indices = rn.sample(valid_positions, num_to_mask)
-print(mask_indices)
-
-for idx in mask_indices:
-    masked_input_ids[idx] = tokenizer.MASK
-    labels[idx] = input_ids[idx] #Instead of changing the index of mask_indices, we are using the mask_indices as the index and masking the wrong word. 
-
-
-print(masked_input_ids)
-print(labels)
+# masked_input_ids = []
+# labels = []
+#
+# valid_positions = []
+# num_to_mask = max(1, round((len(input_ids) - 2) * 0.15))
+#
+# for position, token_id in enumerate(input_ids):
+#             masked_input_ids.append(token_id)
+#             labels.append(-100)
+#             if token_id not in [tokenizer.CLS, tokenizer.SEP, tokenizer.PAD]:
+#                 valid_positions.append(position) #Before we were pushing the token id instead of the index.
+#
+# print(valid_positions)
+# print(masked_input_ids)
+# print(labels)
+#
+# import random as rn
+# print("num to mask:", num_to_mask)
+# mask_indices = rn.sample(valid_positions, num_to_mask)
+# print(mask_indices)
+#
+# for idx in mask_indices:
+#     masked_input_ids[idx] = tokenizer.MASK
+#     labels[idx] = input_ids[idx] #Instead of changing the index of mask_indices, we are using the mask_indices as the index and masking the wrong word.
+#
+#
+# print(masked_input_ids)
+# print(labels)
 
 ##--------Good now its fixed----##
-
 
 
 
