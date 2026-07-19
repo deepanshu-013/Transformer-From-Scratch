@@ -5,9 +5,9 @@ from positional_encoding import PositionalEncoding
 from lm_head import LMHead
 from mlm_dataset import MLMDataset
 from loss import CrossEntropyLoss
-from sgd import SGD
 import numpy as np
-from synthetic_data import generate_synthetic_corpus
+from adam import Adam
+from data import wikitext_2
 
 class Transformer:
     def __init__(self, vocab_size, d_model = 256, num_layers = 1):
@@ -50,78 +50,34 @@ class Transformer:
         # Embedding backward
         self.embedding.backward(dX)
 
-    def update(self, learning_rate):
-        self.lm_head.update(learning_rate)
+# WIKITEXT-2 IMPORTED
+corpus = wikitext_2.DataSet.wiki_text_2()
 
-        for encoder in self.encoders:
-            encoder.update(learning_rate)
+import pickle
+with open("wikitext2_corpus.pkl", "wb") as f:
+    pickle.dump(corpus, f)
 
-        self.embedding.update(learning_rate)
-
-    def zero_grad(self):
-        self.lm_head.zero_grad()
-
-        self.embedding.zero_grad()
-
-        for encoder in self.encoders:
-            encoder.zero_grad()
-
-    @staticmethod
-    def train(input_ids, attention_mask):
-        X, labels = transformer.mlm_dataset.prepare(input_ids)
-
-        optimizer.zero_grad()
-
-        logits = transformer.forward(X, attention_mask)
-
-        loss = ce_loss.forward(logits, labels)
-
-        d_logits = ce_loss.backward()
-
-        transformer.backward(d_logits)
-
-        optimizer.step()
-
-        predictions = np.argmax(logits, axis=1)
-
-        return X, predictions, labels, loss
-
-def load_corpus(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return [line.strip() for line in f if line.strip()]
-
-corpus = load_corpus("synthetic_corpus.txt")
-
+# FIT TOKENIZER
 tokenizer = Tokenizer()
 tokenizer.fit(corpus)
-
 vocab_size = len(tokenizer.word_to_id)
+print(f"Vocabulary Size: {vocab_size}")
 
+# INITIALIZE MODEL & OPTIMIZER
 transformer = Transformer(vocab_size, d_model= 128, num_layers= 4)
-
 ce_loss = CrossEntropyLoss()
-
-optimizer = SGD(model = transformer, learning_rate= 0.01)
-
-total_loss = []
-
-# Debugging prints
-print(f"Original corpus size: {len(corpus)}")
+optimizer = Adam(model=transformer, learning_rate=0.001, clip_value=1.0)
 
 processed_corpus = []
 for sentence in corpus:
-    processed_corpus.append(
-        tokenizer.brew(sentence, max_length=10)
-    )
+    try:
+        processed_corpus.append(tokenizer.brew(sentence, max_length= 64))
+    except ValueError:
+        continue
 
-print(f"Processed corpus size: {len(processed_corpus)}")
-
-# Pre-extract data
+total_loss = []
 train_data = [(s["input_ids"], s["attention_mask"]) for s in processed_corpus]
 num_samples = len(train_data)
-print(f"Number of training samples: {num_samples}")
-
-# ... then start the training loop ...
 
 # Training Loop
 for epoch in range(100):
@@ -129,26 +85,40 @@ for epoch in range(100):
     correct_mask_predictions = 0
     total_mask_predictions = 0
 
-    # 2. SHUFFLE DATA (Crucial for SGD to work properly on small datasets)
     np.random.shuffle(train_data)
 
     for input_ids, attn_mask in train_data:
-        X, predictions, labels, loss = transformer.train(input_ids, attn_mask)
+        # 1. Zero gradients (Handled by Adam now)
+        optimizer.zero_grad()
+
+        # 2. Forward pass
+        X, labels = transformer.mlm_dataset.prepare(input_ids, tokenizer)
+
+        # 3. Calculate Loss
+        logits = transformer.forward(X, attn_mask)
+        loss = ce_loss.forward(logits, labels)
+
+        # 4. Backward pass
+        d_logits = ce_loss.backward()
+        transformer.backward(d_logits)
+
+        # 5. Update weights (Handled by Adam now)
+        optimizer.step()
 
         epoch_loss += loss
 
-        # 3. VECTORIZED ACCURACY CALCULATION (No Python for-loops over tokens)
-        # This replaces your slow: for pred, label in zip(predictions, labels)...
+        # Accuracy calculation
         valid_mask = (labels != -100)
         if np.any(valid_mask):
+            predictions = np.argmax(logits, axis=-1)
             total_mask_predictions += np.sum(valid_mask)
             correct_mask_predictions += np.sum(predictions[valid_mask] == labels[valid_mask])
 
-    # 4. CALCULATE METRICS ONCE PER EPOCH (Outside the inner loop)
-    avg_loss = epoch_loss / num_samples if num_samples > 0 else 0.0
-    accuracy = correct_mask_predictions / max(1, total_mask_predictions)  # max to avoid div by zero
+    avg_loss = epoch_loss / num_samples
+    accuracy = correct_mask_predictions / max(1, total_mask_predictions)
 
-    if epoch % 20 == 0:
+    # Print Gradients & Metrics
+    if epoch % 2 == 0:
         print("--- Gradients ---")
         print("Embedding :", np.linalg.norm(transformer.embedding.d_weights))
         for i, encoder in enumerate(transformer.encoders):
@@ -158,11 +128,7 @@ for epoch in range(100):
             print("WV :", np.linalg.norm(encoder.self_attention.dWV))
             print("FF1:", np.linalg.norm(encoder.feedforward.dweights1))
             print("FF2:", np.linalg.norm(encoder.feedforward.dweights2))
-        print("LM :", np.linalg.norm(transformer.lm_head.linear.d_weights))
+            print("LM :", np.linalg.norm(transformer.lm_head.linear.d_weights))
 
-    # 5. CLEAN PRINT STATEMENT
     print(f"Epoch {epoch:3d} | Loss: {avg_loss:.4f} | Perplexity: {np.exp(avg_loss):.3f} | Acc: {accuracy:.4f}")
-
-
-import pickle
 
