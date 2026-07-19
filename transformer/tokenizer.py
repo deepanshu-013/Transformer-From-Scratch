@@ -31,7 +31,7 @@ class Tokenizer:
         ids = [self.CLS]
 
         for text in sentence1.lower().replace('.', '').split():
-            ids.append(self.word_to_id[text])
+            ids.append(self.word_to_id.get(text, self.UNK))
 
         ids.append(self.SEP)
 
