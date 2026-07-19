@@ -68,23 +68,3 @@ class SelfAttention:
         # True gradient
         d_X = dX_Q + dX_K + dX_V
         return d_X
-
-    def update(self, learning_rate):
-        self.WQ -= learning_rate * self.dWQ
-        self.WK -= learning_rate * self.dWK
-        self.WV -= learning_rate * self.dWV
-
-    def zero_grad(self):
-        self.dWQ = np.zeros_like(self.WQ)
-        self.dWK = np.zeros_like(self.WK)
-        self.dWV = np.zeros_like(self.WV)
-
-
-
-
-
-
-
-
-
-
