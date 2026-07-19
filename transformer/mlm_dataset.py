@@ -1,31 +1,52 @@
 import numpy as np
-import random as rn
-from tokenizer import Tokenizer
-
+import random
 
 class MLMDataset:
-    def __init__(self):
-        self.tokenizer = Tokenizer()
+    def prepare(self, input_ids, tokenizer):
+        self.tokenizer = tokenizer
+        masked = input_ids.copy()
 
-    def prepare(self, input_ids, mask_probability = 0.15):
-        masked_input_ids = []
-        labels = []
-        num_to_mask = max(1, round((len(input_ids) - 2) * mask_probability))
-        valid_positions = []
+        labels = [-100] * len(input_ids)
 
-        for position, token_id in enumerate(input_ids):
-            masked_input_ids.append(token_id)
-            labels.append(-100)
-            if token_id not in [self.tokenizer.CLS, self.tokenizer.SEP, self.tokenizer.PAD]:
-                valid_positions.append(position)
+        candidates = []
 
+        for i in range(1, len(input_ids) - 1):
 
-        mask_indices = rn.sample(valid_positions, num_to_mask)
-        for idx in mask_indices:
-            masked_input_ids[idx] = self.tokenizer.MASK
+            if input_ids[i] in (
+                    self.tokenizer.PAD,
+                    self.tokenizer.CLS,
+                    self.tokenizer.SEP,
+            ):
+                continue
+
+            candidates.append(i)
+
+        random.shuffle(candidates)
+
+        num_to_mask = max(1, int(round(len(candidates) * 0.15)))
+
+        for idx in candidates[:num_to_mask]:
+
             labels[idx] = input_ids[idx]
 
-        return np.array(masked_input_ids), np.array(labels) # Were getting returned as list instead of np array.
+            r = random.random()
+
+            # 80% -> MASK
+            if r < 0.8:
+                masked[idx] = self.tokenizer.MASK
+
+            # 10% -> random token
+            elif r < 0.9:
+                masked[idx] = random.randint(
+                    5,
+                    len(self.tokenizer.word_to_id) - 1
+                )
+
+            # 10% -> unchanged
+            else:
+                pass
+
+        return np.array(masked), np.array(labels) # Were getting returned as list instead of np array.
     
 
 
