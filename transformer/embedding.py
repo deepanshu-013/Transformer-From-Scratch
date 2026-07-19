@@ -14,10 +14,3 @@ class Embedding:
 
         np.add.at(self.d_weights, self.token_ids, d_output)
         #using add.at to avoid overwriting the gradient if a word has appeared twice or more.
-
-    def update(self, learning_rate):
-        self.weights = self.weights - learning_rate * self.d_weights
-
-    def zero_grad(self):
-        self.d_weights = np.zeros_like(self.weights)
-

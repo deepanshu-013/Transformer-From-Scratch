@@ -11,9 +11,3 @@ class LMHead:
     def backward(self, d_inputs):
         d_logits = self.linear.backward(d_inputs)
         return d_logits
-
-    def update(self, learning_rate):
-        self.linear.update(learning_rate)
-
-    def zero_grad(self):
-        self.linear.zero_grad()

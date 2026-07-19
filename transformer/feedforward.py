@@ -31,16 +31,3 @@ class FeedForward:
         doutput = np.dot(dactivated, self.weights1.T)
 
         return doutput
-
-    def update(self, learning_rate):
-        self.weights2 -= learning_rate * self.dweights2
-        self.biases2 -= learning_rate * self.dbiases2
-        self.weights1 -= learning_rate * self.dweights1
-        self.biases1 -= learning_rate * self.dbiases1
-
-    def zero_grad(self):
-        self.dweights2 = np.zeros_like(self.weights2)
-        self.dbiases2 = np.zeros_like(self.biases2)
-        self.dweights1 = np.zeros_like(self.weights1)
-        self.dbiases1 = np.zeros_like(self.biases1)
-

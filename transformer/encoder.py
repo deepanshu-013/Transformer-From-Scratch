@@ -26,14 +26,3 @@ class Encoder:
 
         return d_input
 
-    def update(self, learning_rate):
-        self.layer_norm_2.update(learning_rate)
-        self.feedforward.update(learning_rate)
-        self.layer_norm_1.update(learning_rate)
-        self.self_attention.update(learning_rate)
-
-    def zero_grad(self):
-        self.self_attention.zero_grad()
-        self.feedforward.zero_grad()
-        self.layer_norm_1.zero_grad()
-        self.layer_norm_2.zero_grad()
