@@ -197,7 +197,3 @@ while preserving the understanding gained from implementing every component manu
 - Dive into Deep Learning
 
 ---
-
-## License
-
-MIT License
